@@ -1,0 +1,75 @@
+version: '3.9'
+
+# Local development with Docker Compose.
+# Usage:
+#   docker compose up          — start all services
+#   docker compose up backend  — start only backend + db
+#   docker compose logs -f     — follow logs
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: pianorep-db
+    environment:
+      MYSQL_DATABASE: pianorep
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_USER: pianorep
+      MYSQL_PASSWORD: pianorep
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./out.sql:/docker-entrypoint-initdb.d/out.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-upianorep", "-ppianorep"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pianorep-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./images:/app/images:ro
+    environment:
+      # Database
+      DB_USERNAME: pianorep
+      DB_PASSWORD: pianorep
+      spring.datasource.url: jdbc:mysql://db:3306/pianorep?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+
+      # Secrets — use real values for local dev
+      JWT_SECRET: ${JWT_SECRET:-changeme-this-must-be-at-least-256-bits-long-secret-key}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?Set GOOGLE_CLIENT_ID}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_placeholder}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_placeholder}
+      STRIPE_PRICE_ID: ${STRIPE_PRICE_ID:-price_placeholder}
+
+      INCIPIT_IMAGES_PATH: /app/images
+      FRONTEND_URL: http://localhost:5173
+
+  frontend:
+    image: node:20-alpine
+    container_name: pianorep-frontend
+    working_dir: /app
+    command: sh -c "npm ci && npm run dev -- --host"
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      VITE_API_BASE_URL: ''
+      VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?Set GOOGLE_CLIENT_ID}
+      BACKEND_URL: http://pianorep-backend:8080
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
