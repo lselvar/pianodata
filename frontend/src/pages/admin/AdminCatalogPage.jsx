@@ -51,7 +51,7 @@ export default function AdminCatalogPage() {
       <div className="mb-4">
         <input
           type="text"
-          placeholder="Search by title, composer…"
+          placeholder="Search by Composer, Catalog"
           value={q}
           onChange={e => { setQ(e.target.value); setPage(0) }}
           className="input w-full max-w-sm"
@@ -68,6 +68,7 @@ export default function AdminCatalogPage() {
                 <tr>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">Title</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">Composer</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">Catalog</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">Era</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">Level</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">Incipit</th>
@@ -87,7 +88,8 @@ export default function AdminCatalogPage() {
                         <div className="text-xs text-gray-400">arr. {piece.compArrangedFrom}</div>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-gray-500">{piece.era || '—'}</td>
+                    <td className="px-4 py-3 text-gray-500">{piece.catalogName || '—'}</td>
+                    <td className="px-4 py-3 text-gray-500">{piece.eraLabel || piece.era || '—'}</td>
                     <td className="px-4 py-3 text-gray-500">{piece.level || '—'}</td>
                     <td className="px-4 py-3">
                       {piece.incipit

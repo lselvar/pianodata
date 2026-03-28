@@ -40,12 +40,16 @@ public class CatalogController {
             @AuthenticationPrincipal UserPrincipal principal,
             @RequestParam(required = false) String q,
             @RequestParam(required = false) String composer,
+            @RequestParam(required = false) String catalogName,
             @RequestParam(required = false) String era,
+            @RequestParam(required = false) List<String> levels,
+            @RequestParam(required = false) Integer rating,
             @RequestParam(required = false) String keyName,
+            @RequestParam(required = false) String timeSignature,
             @RequestParam(required = false) String mood,
+            @RequestParam(required = false) String movement,
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String tempoSpeed,
-            @RequestParam(required = false) List<String> levels,
             @RequestParam(defaultValue = "0")  int page,
             @RequestParam(defaultValue = "25") int size,
             @RequestParam(defaultValue = "composer") String sort,
@@ -54,7 +58,8 @@ public class CatalogController {
         checkSubscription(principal);
 
         PageResponse<CatalogItemDto> result = catalogService.search(
-                q, composer, era, keyName, mood, type, tempoSpeed, levels,
+                q, composer, catalogName, era, levels, rating, keyName,
+                timeSignature, mood, movement, type, tempoSpeed,
                 page, size, sort, direction);
         return ResponseEntity.ok(result);
     }

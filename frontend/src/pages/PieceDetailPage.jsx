@@ -46,11 +46,11 @@ export default function PieceDetailPage() {
   )
 
   const fields = [
-    { label: 'Era', value: piece.era },
+    { label: 'Era', value: piece.eraLabel || piece.era },
     { label: 'Key', value: piece.keyName },
     { label: 'Time Signature', value: piece.timeSignature },
     { label: 'Tempo', value: piece.tempo },
-    { label: 'Tempo Speed', value: piece.tempoSpeed },
+    { label: 'Tempo Speed', value: piece.tempoSpeedLabel || piece.tempoSpeed },
     { label: 'Level', value: piece.level },
     { label: 'Rating', value: piece.rating },
     { label: 'Mood', value: piece.mood },

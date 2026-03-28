@@ -43,8 +43,10 @@ public class CatalogService {
     );
 
     public PageResponse<CatalogItemDto> search(
-            String q, String composer, String era, String keyName,
-            String mood, String type, String tempoSpeed, List<String> levels,
+            String q, String composer, String catalogName, String era,
+            List<String> levels, Integer rating, String keyName,
+            String timeSignature, String mood, String movement,
+            String type, String tempoSpeed,
             int page, int size, String sort, String direction) {
 
         size = Math.min(size, 100);
@@ -52,41 +54,51 @@ public class CatalogService {
                 ? Sort.Direction.DESC : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(dir, sort));
 
-        Specification<Catalog> spec = buildSpec(q, composer, era, keyName, mood, type, tempoSpeed, levels);
+        Specification<Catalog> spec = buildSpec(q, composer, catalogName, era, levels,
+                rating, keyName, timeSignature, mood, movement, type, tempoSpeed);
         Page<Catalog> result = catalogRepository.findAll(spec, pageable);
         Page<CatalogItemDto> dtoPage = result.map(CatalogItemDto::from);
 
         return PageResponse.from(dtoPage);
     }
 
-    private Specification<Catalog> buildSpec(String q, String composer, String era,
-                                              String keyName, String mood, String type,
-                                              String tempoSpeed, List<String> levels) {
+    private Specification<Catalog> buildSpec(String q, String composer, String catalogName,
+                                              String era, List<String> levels, Integer rating,
+                                              String keyName, String timeSignature, String mood,
+                                              String movement, String type, String tempoSpeed) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
             if (StringUtils.hasText(q)) {
                 String like = "%" + q.toLowerCase() + "%";
                 predicates.add(cb.or(
-                        cb.like(cb.lower(root.get("title")), like),
-                        cb.like(cb.lower(root.get("composer")), like),
-                        cb.like(cb.lower(root.get("catalogName")), like)
+                    cb.like(cb.lower(root.get("title")), like),
+                    cb.like(cb.lower(root.get("composer")), like),
+                    cb.like(cb.lower(root.get("catalogName")), like)
                 ));
             }
             if (StringUtils.hasText(composer))
                 predicates.add(cb.equal(root.get("composer"), composer));
+            if (StringUtils.hasText(catalogName))
+                predicates.add(cb.like(cb.lower(root.get("catalogName")), "%" + catalogName.toLowerCase() + "%"));
             if (StringUtils.hasText(era))
                 predicates.add(cb.equal(root.get("era"), era));
+            if (levels != null && !levels.isEmpty())
+                predicates.add(root.get("level").in(levels));
+            if (rating != null)
+                predicates.add(cb.equal(root.get("rating"), rating));
             if (StringUtils.hasText(keyName))
                 predicates.add(cb.equal(root.get("keyName"), keyName));
+            if (StringUtils.hasText(timeSignature))
+                predicates.add(cb.like(root.get("timeSignature"), "%" + timeSignature + "%"));
             if (StringUtils.hasText(mood))
                 predicates.add(cb.like(root.get("mood"), "%" + mood + "%"));
+            if (StringUtils.hasText(movement))
+                predicates.add(cb.like(cb.lower(root.get("movement")), "%" + movement.toLowerCase() + "%"));
             if (StringUtils.hasText(type))
                 predicates.add(cb.like(root.get("type"), "%" + type + "%"));
             if (StringUtils.hasText(tempoSpeed))
                 predicates.add(cb.equal(root.get("tempoSpeed"), tempoSpeed));
-            if (levels != null && !levels.isEmpty())
-                predicates.add(root.get("level").in(levels));
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };

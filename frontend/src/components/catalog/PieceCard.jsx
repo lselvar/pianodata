@@ -19,9 +19,9 @@ export default function PieceCard({ piece }) {
         <p className="text-xs text-gray-400 mt-0.5">arr. {piece.compArrangedFrom}</p>
       )}
       <div className="flex flex-wrap gap-1 mt-2">
-        {piece.era && <Badge>{piece.era}</Badge>}
+        {piece.era && <Badge>{piece.eraLabel || piece.era}</Badge>}
         {piece.level && <Badge>{piece.level}</Badge>}
-        {piece.tempoSpeed && <Badge>{piece.tempoSpeed}</Badge>}
+        {piece.tempoSpeed && <Badge>{piece.tempoSpeedLabel || piece.tempoSpeed}</Badge>}
       </div>
     </Link>
   )

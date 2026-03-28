@@ -3,8 +3,25 @@ package com.pianorep.dto.response;
 import com.pianorep.entity.Catalog;
 import lombok.Data;
 
+import java.util.Map;
+
 @Data
 public class CatalogItemDto {
+
+    private static final Map<String, String> ERA_LABELS = Map.of(
+            "B", "Baroque",
+            "C", "Classical",
+            "R", "Romantic",
+            "M", "Modern",
+            "CO", "Contemporary"
+    );
+
+    private static final Map<String, String> TEMPO_LABELS = Map.of(
+            "S", "Slow",
+            "M", "Medium",
+            "F", "Fast"
+    );
+
     private Integer id;
     private String title;
     private String movement;
@@ -12,10 +29,12 @@ public class CatalogItemDto {
     private String compArrangedFrom;
     private String catalogName;
     private String era;
+    private String eraLabel;
     private String keyName;
     private String timeSignature;
     private String tempo;
     private String tempoSpeed;
+    private String tempoSpeedLabel;
     private String level;
     private Integer rating;
     private String mood;
@@ -40,10 +59,12 @@ public class CatalogItemDto {
         dto.setCompArrangedFrom(c.getCompArrangedFrom());
         dto.setCatalogName(c.getCatalogName());
         dto.setEra(c.getEra());
+        dto.setEraLabel(ERA_LABELS.getOrDefault(c.getEra(), c.getEra()));
         dto.setKeyName(c.getKeyName());
         dto.setTimeSignature(c.getTimeSignature());
         dto.setTempo(c.getTempo());
         dto.setTempoSpeed(c.getTempoSpeed());
+        dto.setTempoSpeedLabel(TEMPO_LABELS.getOrDefault(c.getTempoSpeed(), c.getTempoSpeed()));
         dto.setLevel(c.getLevel());
         dto.setRating(c.getRating());
         dto.setMood(c.getMood());

@@ -13,7 +13,11 @@ const ERAS = [
   { value: 'CO', label: 'Contemporary' },
 ]
 
-const TEMPO_SPEEDS = ['S', 'M', 'F']  // Slow, Medium, Fast — adjust to match your data
+const TEMPO_SPEEDS = [
+  { value: 'S', label: 'Slow' },
+  { value: 'M', label: 'Medium' },
+  { value: 'F', label: 'Fast' },
+]
 
 const empty = {
   title: '', composer: '', compArrangedFrom: '', catalogName: '', movement: '',
@@ -149,7 +153,7 @@ export default function CatalogFormPage() {
             <Field label="Tempo Speed">
               <select className="input" value={form.tempoSpeed} onChange={set('tempoSpeed')}>
                 <option value="">— select —</option>
-                {TEMPO_SPEEDS.map(s => <option key={s} value={s}>{s}</option>)}
+                {TEMPO_SPEEDS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
               </select>
             </Field>
             <Field label="Level"><input className="input" value={form.level} onChange={set('level')} placeholder="e.g. Intermediate" /></Field>
