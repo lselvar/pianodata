@@ -24,4 +24,10 @@ public interface CatalogRepository extends JpaRepository<Catalog, Integer>,
 
     @Query("SELECT DISTINCT c.level FROM Catalog c WHERE c.level IS NOT NULL AND c.level != '' ORDER BY c.level")
     List<String> findDistinctLevels();
+
+    @Query("SELECT DISTINCT c.levelSecundo FROM Catalog c WHERE c.levelSecundo IS NOT NULL AND c.levelSecundo != '' ORDER BY c.levelSecundo")
+    List<String> findDistinctLevelSecundos();
+
+    @Query("SELECT DISTINCT c.rating FROM Catalog c WHERE c.rating IS NOT NULL ORDER BY c.rating")
+    List<Integer> findDistinctRatings();
 }

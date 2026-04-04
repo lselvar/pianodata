@@ -31,6 +31,9 @@ export default function Navbar() {
               <Link to="/admin/users" className="text-sm text-piano-600 font-medium hover:text-piano-800">
                 Users
               </Link>
+              <Link to="/admin/bulk-upload" className="text-sm text-piano-600 font-medium hover:text-piano-800">
+                Bulk Upload
+              </Link>
             </>
           )}
           <Link to="/pricing" className="text-sm text-gray-600 hover:text-piano-600">

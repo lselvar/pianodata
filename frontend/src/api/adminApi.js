@@ -13,4 +13,18 @@ export const adminApi = {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
   },
+  bulkUploadCsv: (file) => {
+    const form = new FormData()
+    form.append('file', file)
+    return api.post('/api/admin/catalog/bulk/csv', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
+  bulkUploadImages: (file) => {
+    const form = new FormData()
+    form.append('file', file)
+    return api.post('/api/admin/catalog/bulk/images', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
 }

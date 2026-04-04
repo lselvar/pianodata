@@ -1,6 +1,7 @@
 package com.pianorep.controller;
 
 import com.pianorep.dto.request.CatalogRequest;
+import com.pianorep.dto.response.BulkUploadResult;
 import com.pianorep.dto.response.CatalogItemDto;
 import com.pianorep.security.UserPrincipal;
 import com.pianorep.service.CatalogService;
@@ -55,6 +56,27 @@ public class AdminCatalogController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/bulk/csv")
+    public ResponseEntity<BulkUploadResult> bulkUploadCsv(
+            @RequestParam("file") MultipartFile file,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        try {
+            return ResponseEntity.ok(catalogService.bulkCreateFromCsv(file, principal.getEmail()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/bulk/images")
+    public ResponseEntity<BulkUploadResult> bulkUploadImages(
+            @RequestParam("file") MultipartFile file) {
+        try {
+            return ResponseEntity.ok(catalogService.bulkStoreImages(file, imagesBasePath));
+        } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
     }

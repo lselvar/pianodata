@@ -31,7 +31,7 @@ const CATALOG_PAGE = {
       title: 'Variations on a Theme',
       movement: '1',
       composer: 'Adam, Louis',
-      compArrangedFrom: 'Haydn, Josef',
+      originalSource: 'Haydn, Josef',
       catalogName: 'Classical Favorites',
       era: 'C',
       level: 'Intermediate',
@@ -43,7 +43,7 @@ const CATALOG_PAGE = {
       title: 'Sonata in C Major',
       movement: '1',
       composer: 'Bach, J.S.',
-      compArrangedFrom: null,
+      originalSource: null,
       catalogName: 'Bach Collection',
       era: 'B',
       level: 'Advanced',
@@ -69,7 +69,7 @@ const PIECE_DETAIL = {
   title: 'Variations on a Theme',
   movement: '1',
   composer: 'Adam, Louis',
-  compArrangedFrom: 'Haydn, Josef',
+  originalSource: 'Haydn, Josef',
   catalogName: 'Classical Favorites',
   era: 'C',
   keyName: 'C major',
@@ -307,8 +307,8 @@ test.describe('Admin — Catalog', () => {
     await expect(page.getByText('Composer *')).toBeVisible()
     await expect(page.getByText('Catalog Name *')).toBeVisible()
 
-    // Arranged From field (new field added in this feature)
-    await expect(page.getByText('Arranged From')).toBeVisible()
+    // Original Source field
+    await expect(page.getByText('Original Source')).toBeVisible()
     await expect(page.getByPlaceholder('e.g. Folk - German')).toBeVisible()
   })
 
@@ -319,7 +319,7 @@ test.describe('Admin — Catalog', () => {
     await expect(page).toHaveURL(/\/admin\/catalog\/\d+\/edit/)
     await expect(page.getByRole('heading', { name: 'Edit Entry' })).toBeVisible()
 
-    // Arranged From should be pre-filled with existing data
+    // Original Source should be pre-filled with existing data
     await expect(page.getByPlaceholder('e.g. Folk - German')).toHaveValue('Haydn, Josef')
   })
 

@@ -23,8 +23,8 @@ public class Catalog {
     @Column(name = "composer", nullable = false, length = 100)
     private String composer;
 
-    @Column(name = "comp_arranged_from", length = 100)
-    private String compArrangedFrom;
+    @Column(name = "original_source", length = 100)
+    private String originalSource;
 
     @Column(name = "catalogName", nullable = false, length = 150)
     private String catalogName;
@@ -47,6 +47,9 @@ public class Catalog {
     @Column(name = "level", length = 200)
     private String level;
 
+    @Column(name = "level_secundo", length = 200)
+    private String levelSecundo;
+
     @Column(name = "rating")
     private Integer rating;
 
@@ -59,11 +62,17 @@ public class Catalog {
     @Column(name = "etude", length = 200)
     private String etude;
 
+    @Column(name = "solo_duet", length = 200)
+    private String soloDuet;
+
     @Column(name = "book", length = 200)
     private String book;
 
     @Column(name = "incipit", nullable = true, length = 10)
     private String incipit;
+
+    @Column(name = "incipit_secundo", length = 10)
+    private String incipitSecundo;
 
     @Column(name = "permissionStatus", length = 200)
     private String permissionStatus;

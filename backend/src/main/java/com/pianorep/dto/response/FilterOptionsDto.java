@@ -15,4 +15,6 @@ public class FilterOptionsDto {
     private List<String> keys;
     private List<String> tempoSpeeds;
     private List<String> levels;
+    private List<String> levelSecundos;
+    private List<Integer> ratings;
 }

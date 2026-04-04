@@ -84,8 +84,8 @@ export default function AdminCatalogPage() {
                     </td>
                     <td className="px-4 py-3 text-gray-700">
                       <div>{piece.composer}</div>
-                      {piece.compArrangedFrom && (
-                        <div className="text-xs text-gray-400">arr. {piece.compArrangedFrom}</div>
+                      {piece.originalSource && (
+                        <div className="text-xs text-gray-400">arr. {piece.originalSource}</div>
                       )}
                     </td>
                     <td className="px-4 py-3 text-gray-500">{piece.catalogName || '—'}</td>

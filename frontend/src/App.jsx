@@ -14,6 +14,7 @@ import ProfilePage from './pages/ProfilePage'
 import AdminCatalogPage from './pages/admin/AdminCatalogPage'
 import CatalogFormPage from './pages/admin/CatalogFormPage'
 import AdminUsersPage from './pages/admin/AdminUsersPage'
+import BulkUploadPage from './pages/admin/BulkUploadPage'
 
 function Layout() {
   return (
@@ -68,6 +69,10 @@ export default function App() {
               <Route
                 path="/admin/users"
                 element={<AdminRoute><AdminUsersPage /></AdminRoute>}
+              />
+              <Route
+                path="/admin/bulk-upload"
+                element={<AdminRoute><BulkUploadPage /></AdminRoute>}
               />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

@@ -20,9 +20,9 @@ const TEMPO_SPEEDS = [
 ]
 
 const empty = {
-  title: '', composer: '', compArrangedFrom: '', catalogName: '', movement: '',
+  title: '', composer: '', originalSource: '', catalogName: '', movement: '',
   era: '', keyName: '', timeSignature: '', tempo: '', tempoSpeed: '',
-  level: '', rating: '', mood: '', type: '', etude: '', book: '',
+  level: '', levelSecundo: '', rating: '', mood: '', type: '', etude: '', soloDuet: '', book: '',
   permissionStatus: '', bookLink1: '', bookLink2: '', bookLink3: '',
   bookLink4: '', bookLink5: '', booksByLevel: '',
 }
@@ -36,6 +36,9 @@ export default function CatalogFormPage() {
   const [incipitFile, setIncipitFile] = useState(null)
   const [incipitPreview, setIncipitPreview] = useState(null)
   const [existingIncipit, setExistingIncipit] = useState(null)
+  const [incipitSecundoFile, setIncipitSecundoFile] = useState(null)
+  const [incipitSecundoPreview, setIncipitSecundoPreview] = useState(null)
+  const [existingIncipitSecundo, setExistingIncipitSecundo] = useState(null)
   const [loading, setLoading] = useState(isEdit)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
@@ -47,19 +50,20 @@ export default function CatalogFormPage() {
         const p = res.data
         setForm({
           title: p.title || '', composer: p.composer || '',
-          compArrangedFrom: p.compArrangedFrom || '',
+          originalSource: p.originalSource || '',
           catalogName: p.catalogName || '', movement: p.movement || '',
           era: p.era || '', keyName: p.keyName || '',
           timeSignature: p.timeSignature || '', tempo: p.tempo || '',
-          tempoSpeed: p.tempoSpeed || '', level: p.level || '',
+          tempoSpeed: p.tempoSpeed || '', level: p.level || '', levelSecundo: p.levelSecundo || '',
           rating: p.rating ?? '', mood: p.mood || '', type: p.type || '',
-          etude: p.etude || '', book: p.book || '',
+          etude: p.etude || '', soloDuet: p.soloDuet || '', book: p.book || '',
           permissionStatus: p.permissionStatus || '',
           bookLink1: p.bookLink1 || '', bookLink2: p.bookLink2 || '',
           bookLink3: p.bookLink3 || '', bookLink4: p.bookLink4 || '',
           bookLink5: p.bookLink5 || '', booksByLevel: p.booksByLevel || '',
         })
         setExistingIncipit(p.incipit || null)
+        setExistingIncipitSecundo(p.incipitSecundo || null)
       })
       .catch(() => setError('Failed to load entry.'))
       .finally(() => setLoading(false))
@@ -72,6 +76,13 @@ export default function CatalogFormPage() {
     if (!file) return
     setIncipitFile(file)
     setIncipitPreview(URL.createObjectURL(file))
+  }
+
+  const handleSecundoFileChange = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    setIncipitSecundoFile(file)
+    setIncipitSecundoPreview(URL.createObjectURL(file))
   }
 
   const handleSubmit = async (e) => {
@@ -132,7 +143,7 @@ export default function CatalogFormPage() {
           <h2 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">Required</h2>
           <Field label="Title *"><input className="input" value={form.title} onChange={set('title')} /></Field>
           <Field label="Composer *"><input className="input" value={form.composer} onChange={set('composer')} /></Field>
-          <Field label="Arranged From"><input className="input" value={form.compArrangedFrom} onChange={set('compArrangedFrom')} placeholder="e.g. Folk - German" /></Field>
+          <Field label="Original Source"><input className="input" value={form.originalSource} onChange={set('originalSource')} placeholder="e.g. Folk - German" /></Field>
           <Field label="Catalog Name *"><input className="input" value={form.catalogName} onChange={set('catalogName')} /></Field>
           <Field label="Movement"><input className="input" value={form.movement} onChange={set('movement')} /></Field>
         </div>
@@ -157,11 +168,13 @@ export default function CatalogFormPage() {
               </select>
             </Field>
             <Field label="Level"><input className="input" value={form.level} onChange={set('level')} placeholder="e.g. Intermediate" /></Field>
+            <Field label="Level Secondo"><input className="input" value={form.levelSecundo} onChange={set('levelSecundo')} placeholder="e.g. Intermediate" /></Field>
             <Field label="Rating"><input className="input" type="number" min="1" max="10" value={form.rating} onChange={set('rating')} /></Field>
           </div>
           <Field label="Mood"><input className="input" value={form.mood} onChange={set('mood')} /></Field>
           <Field label="Type"><input className="input" value={form.type} onChange={set('type')} /></Field>
           <Field label="Etude"><input className="input" value={form.etude} onChange={set('etude')} /></Field>
+          <Field label="Solo / Duet"><input className="input" value={form.soloDuet} onChange={set('soloDuet')} /></Field>
           <Field label="Book"><input className="input" value={form.book} onChange={set('book')} /></Field>
           <Field label="Books by Level"><input className="input" value={form.booksByLevel} onChange={set('booksByLevel')} /></Field>
           <Field label="Permission Status"><input className="input" value={form.permissionStatus} onChange={set('permissionStatus')} /></Field>
@@ -179,7 +192,7 @@ export default function CatalogFormPage() {
 
         {/* Incipit image */}
         <div className="card space-y-4">
-          <h2 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">Incipit Image</h2>
+          <h2 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">Incipit Images</h2>
           {existingIncipit && !incipitPreview && (
             <div>
               <p className="text-xs text-gray-500 mb-2">Current image ({existingIncipit}):</p>
@@ -204,6 +217,36 @@ export default function CatalogFormPage() {
               type="file"
               accept="image/png"
               onChange={handleFileChange}
+              className="text-sm text-gray-700"
+            />
+          </div>
+
+          <hr className="border-gray-100" />
+          <p className="text-xs text-gray-500 font-medium">Incipit Secondo</p>
+          {existingIncipitSecundo && !incipitSecundoPreview && (
+            <div>
+              <p className="text-xs text-gray-500 mb-2">Current image ({existingIncipitSecundo}):</p>
+              <AuthenticatedImage
+                src={catalogApi.incipitUrl(existingIncipitSecundo)}
+                alt="Current incipit secondo"
+                className="max-h-32 object-contain bg-gray-50 rounded border border-gray-200"
+              />
+            </div>
+          )}
+          {incipitSecundoPreview && (
+            <div>
+              <p className="text-xs text-gray-500 mb-2">New image preview:</p>
+              <img src={incipitSecundoPreview} alt="Preview" className="max-h-32 object-contain bg-gray-50 rounded border border-gray-200" />
+            </div>
+          )}
+          <div>
+            <label className="text-xs text-gray-500 block mb-1">
+              {existingIncipitSecundo ? 'Replace incipit secondo image (PNG only):' : 'Upload incipit secondo image (PNG only):'}
+            </label>
+            <input
+              type="file"
+              accept="image/png"
+              onChange={handleSecundoFileChange}
               className="text-sm text-gray-700"
             />
           </div>

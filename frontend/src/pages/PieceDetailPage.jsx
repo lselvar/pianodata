@@ -52,12 +52,14 @@ export default function PieceDetailPage() {
     { label: 'Tempo', value: piece.tempo },
     { label: 'Tempo Speed', value: piece.tempoSpeedLabel || piece.tempoSpeed },
     { label: 'Level', value: piece.level },
+    { label: 'Level Secondo', value: piece.levelSecundo },
     { label: 'Rating', value: piece.rating },
     { label: 'Mood', value: piece.mood },
     { label: 'Type', value: piece.type },
     { label: 'Catalog', value: piece.catalogName },
     { label: 'Book', value: piece.book },
     { label: 'Etude', value: piece.etude },
+    { label: 'Solo / Duet', value: piece.soloDuet },
   ].filter(f => f.value)
 
   const bookLinks = [piece.bookLink1, piece.bookLink2, piece.bookLink3, piece.bookLink4, piece.bookLink5]
@@ -79,12 +81,19 @@ export default function PieceDetailPage() {
             className="w-full max-h-48 object-contain bg-gray-50 rounded"
           />
         )}
+        {piece.incipitSecundo && (
+          <AuthenticatedImage
+            src={catalogApi.incipitUrl(piece.incipitSecundo)}
+            alt="Incipit Secondo"
+            className="w-full max-h-48 object-contain bg-gray-50 rounded"
+          />
+        )}
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{piece.title}</h1>
           {piece.movement && <p className="text-gray-500 mt-0.5">{piece.movement}</p>}
           <p className="text-piano-600 font-medium mt-1">{piece.composer}</p>
-          {piece.compArrangedFrom && (
-            <p className="text-sm text-gray-500 mt-0.5">arr. {piece.compArrangedFrom}</p>
+          {piece.originalSource && (
+            <p className="text-sm text-gray-500 mt-0.5">arr. {piece.originalSource}</p>
           )}
         </div>
 

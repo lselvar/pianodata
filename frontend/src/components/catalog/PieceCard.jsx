@@ -15,8 +15,8 @@ export default function PieceCard({ piece }) {
       <h3 className="font-semibold text-gray-900 text-sm leading-tight">{piece.title}</h3>
       {piece.movement && <p className="text-xs text-gray-500 mt-0.5">{piece.movement}</p>}
       <p className="text-xs text-piano-600 mt-1">{piece.composer}</p>
-      {piece.compArrangedFrom && (
-        <p className="text-xs text-gray-400 mt-0.5">arr. {piece.compArrangedFrom}</p>
+      {piece.originalSource && (
+        <p className="text-xs text-gray-400 mt-0.5">arr. {piece.originalSource}</p>
       )}
       <div className="flex flex-wrap gap-1 mt-2">
         {piece.era && <Badge>{piece.eraLabel || piece.era}</Badge>}
