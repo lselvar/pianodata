@@ -22,6 +22,7 @@ export default function PieceCard({ piece }) {
         {piece.era && <Badge>{piece.eraLabel || piece.era}</Badge>}
         {piece.level && <Badge>{piece.level}</Badge>}
         {piece.tempoSpeed && <Badge>{piece.tempoSpeedLabel || piece.tempoSpeed}</Badge>}
+        {piece.etude && <Badge>{piece.etude}</Badge>}
       </div>
     </Link>
   )

@@ -24,8 +24,10 @@ frontend/.firebase/
 # Playwright (root-level)
 node_modules/
 playwright-report/
+playwright-report-search/
 test-results/
 package-lock.json
+tests/.auth/
 
 # Local dev artifacts
 .backend_url
