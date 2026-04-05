@@ -4,8 +4,8 @@
  * Usage:
  *   npm run test:search
  *
- * First run opens Chrome for Google login (raj.selvaraj.arch@gmail.com).
- * Auth state is saved to tests/.auth/state.json and reused on subsequent runs.
+ * Auth is handled by tests/do-auth.cjs (runs first via npm pre-script).
+ * The saved state lives in tests/.auth/state.json (git-ignored).
  *
  * Prerequisites:
  *   - Frontend: npm run dev  (port 5173)
@@ -20,8 +20,6 @@ const AUTH_STATE = resolve('tests/.auth/state.json')
 export default defineConfig({
   testDir: './tests',
   testMatch: '**/search.spec.js',
-  globalSetup: './tests/global.setup.js',
-
   timeout: 60_000,
   expect: { timeout: 15_000 },
   fullyParallel: false,
@@ -34,8 +32,8 @@ export default defineConfig({
 
   use: {
     baseURL: 'http://localhost:5173',
-    channel: 'chrome',      // Use the actual Chrome browser
-    headless: false,         // Run headed so you can watch the tests
+    channel: 'chrome',
+    headless: false,
     storageState: AUTH_STATE,
     viewport: { width: 1440, height: 900 },
     actionTimeout: 15_000,

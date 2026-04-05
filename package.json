@@ -7,6 +7,7 @@
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
     "test:report": "playwright show-report",
+    "pretest:search": "node tests/make-dev-token.cjs",
     "test:search": "playwright test --config=playwright.search.config.js",
     "test:search:report": "playwright show-report playwright-report-search"
   },
