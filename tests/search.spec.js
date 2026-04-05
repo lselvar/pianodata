@@ -161,19 +161,28 @@ test.describe('Catalog Search & Filters', () => {
   // ── 7. Era dropdown ──────────────────────────────────────────────────────
   test('7 · era dropdown — iterate each available era', async ({ page }) => {
     const sel = page.locator('label:text-is("Era")').locator('..').locator('select')
-    const opts = await sel.locator('option').allTextContents()
-    const eras = opts.filter(o => o !== 'All')
-    console.log(`  Eras: [${eras.join(', ')}]`)
+    const optEls = sel.locator('option')
+    const optCount = await optEls.count()
 
-    for (const era of eras) {
-      await afterSearch(page, () => sel.selectOption({ label: era }))
+    // Select by index (not label) to avoid Playwright whitespace normalisation
+    // matching the wrong option (e.g. "C " being treated same as "C")
+    const eraLabels = []
+    for (let i = 1; i < optCount; i++) {  // i=0 is "All"
+      const label = (await optEls.nth(i).textContent())?.trim() ?? ''
+      eraLabels.push(label)
+    }
+    console.log(`  Eras: [${eraLabels.join(', ')}]`)
+
+    for (let i = 1; i < optCount; i++) {
+      const label = eraLabels[i - 1]
+      await afterSearch(page, () => sel.selectOption({ index: i }))
       const count = await getCount(page)
-      console.log(`    ${era}: ${count}`)
+      console.log(`    ${label}: ${count}`)
       expect(count).toBeGreaterThanOrEqual(0)
     }
 
-    // Reset to All
-    await afterSearch(page, () => sel.selectOption(''))
+    // Reset to All (index 0)
+    await afterSearch(page, () => sel.selectOption({ index: 0 }))
   })
 
   // ── 8. Level multi-select ────────────────────────────────────────────────
@@ -259,20 +268,25 @@ test.describe('Catalog Search & Filters', () => {
   // ── 12. Key dropdown ─────────────────────────────────────────────────────
   test('12 · key dropdown', async ({ page }) => {
     const sel = page.locator('label:text-is("Key")').locator('..').locator('select')
-    const opts = await sel.locator('option').allTextContents()
-    const keys = opts.filter(o => o !== 'All')
-    console.log(`  Keys available: ${keys.length}`)
+    const optEls = sel.locator('option')
+    const optCount = await optEls.count()
+    console.log(`  Keys available: ${optCount - 1}`)  // -1 for "All"
 
-    if (keys.length >= 1) {
-      await afterSearch(page, () => sel.selectOption({ label: keys[0] }))
-      console.log(`  Key "${keys[0]}": ${await getCount(page)}`)
+    if (optCount >= 2) {
+      // Select index 1 (first real key) — avoid label matching quirks
+      const key1 = (await optEls.nth(1).textContent())?.trim() ?? ''
+      await afterSearch(page, () => sel.selectOption({ index: 1 }))
+      console.log(`  Key "${key1}": ${await getCount(page)}`)
 
-      if (keys.length >= 2) {
-        await afterSearch(page, () => sel.selectOption({ label: keys[1] }))
-        console.log(`  Key "${keys[1]}": ${await getCount(page)}`)
+      if (optCount >= 3) {
+        // Select index 2 (second real key)
+        const key2 = (await optEls.nth(2).textContent())?.trim() ?? ''
+        await afterSearch(page, () => sel.selectOption({ index: 2 }))
+        console.log(`  Key "${key2}": ${await getCount(page)}`)
       }
 
-      await afterSearch(page, () => sel.selectOption(''))
+      // Reset to All (index 0)
+      await afterSearch(page, () => sel.selectOption({ index: 0 }))
     }
   })
 
@@ -403,9 +417,10 @@ test.describe('Catalog Search & Filters', () => {
     await firstCard.click()
     await expect(page).toHaveURL(/\/catalog\/\d+/, { timeout: 10_000 })
 
-    // Detail page renders title in h1 and composer with the right classes
+    // Detail page renders title in h1 and composer in a <p> (not <a>, which
+    // would match the navbar "Admin" link that also uses text-piano-600 font-medium)
     await expect(page.locator('h1').first()).toContainText(title, { timeout: 15_000 })
-    await expect(page.locator('.text-piano-600.font-medium').first()).toContainText(composer)
+    await expect(page.locator('p.text-piano-600.font-medium').first()).toContainText(composer)
 
     // Verify "← Back to catalog" link works
     await page.locator('text=← Back to catalog').click()
