@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/api/catalog")
@@ -94,7 +93,7 @@ public class CatalogController {
 
         return ResponseEntity.ok()
                 .contentType(MediaType.IMAGE_PNG)
-                .cacheControl(CacheControl.maxAge(7, TimeUnit.DAYS))
+                .cacheControl(CacheControl.noStore())
                 .body(resource);
     }
 

@@ -5,7 +5,7 @@ import AuthenticatedImage from '../common/AuthenticatedImage'
 export default function PieceCard({ piece }) {
   return (
     <Link to={`/catalog/${piece.id}`} className="card hover:shadow-md transition-shadow block">
-      {piece.incipit && (
+      {piece.incipit && piece.permissionStatus !== 'NEED' && (
         <AuthenticatedImage
           src={catalogApi.incipitUrl(piece.incipit)}
           alt="Incipit"
@@ -22,7 +22,6 @@ export default function PieceCard({ piece }) {
         {piece.era && <Badge>{piece.eraLabel || piece.era}</Badge>}
         {piece.level && <Badge>{piece.level}</Badge>}
         {piece.tempoSpeed && <Badge>{piece.tempoSpeedLabel || piece.tempoSpeed}</Badge>}
-        {piece.etude && <Badge>{piece.etude}</Badge>}
       </div>
     </Link>
   )

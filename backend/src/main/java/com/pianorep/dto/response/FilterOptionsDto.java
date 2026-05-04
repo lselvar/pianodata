@@ -17,4 +17,7 @@ public class FilterOptionsDto {
     private List<String> levels;
     private List<String> levelSecundos;
     private List<Integer> ratings;
+    private List<String> moods;
+    private List<String> types;
+    private List<String> etudes;
 }

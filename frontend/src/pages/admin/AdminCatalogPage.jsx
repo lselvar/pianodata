@@ -51,7 +51,7 @@ export default function AdminCatalogPage() {
       <div className="mb-4">
         <input
           type="text"
-          placeholder="Search by Composer, Catalog"
+          placeholder="Search by Composer, Catalog, Title"
           value={q}
           onChange={e => { setQ(e.target.value); setPage(0) }}
           className="input w-full max-w-sm"

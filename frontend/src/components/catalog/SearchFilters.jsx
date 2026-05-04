@@ -251,7 +251,7 @@ export default function SearchFilters({ filters, options, onChange }) {
         <label className="block text-xs font-medium text-gray-600 mb-1">Meter</label>
         <input
           className="input"
-          placeholder="e.g. 4/4"
+          placeholder="Meter"
           value={filters.timeSignature || ''}
           onChange={handle('timeSignature')}
         />
@@ -260,34 +260,34 @@ export default function SearchFilters({ filters, options, onChange }) {
       {/* Mood */}
       <div>
         <label className="block text-xs font-medium text-gray-600 mb-1">Mood</label>
-        <input
-          className="input"
-          placeholder="Mood…"
-          value={filters.mood || ''}
-          onChange={handle('mood')}
-        />
+        <select className="select" value={filters.mood || ''} onChange={handle('mood')}>
+          <option value="">All</option>
+          {(options.moods || []).map(o => (
+            <option key={o} value={o}>{o}</option>
+          ))}
+        </select>
       </div>
 
       {/* Type */}
       <div>
         <label className="block text-xs font-medium text-gray-600 mb-1">Type</label>
-        <input
-          className="input"
-          placeholder="Type…"
-          value={filters.type || ''}
-          onChange={handle('type')}
-        />
+        <select className="select" value={filters.type || ''} onChange={handle('type')}>
+          <option value="">All</option>
+          {(options.types || []).map(o => (
+            <option key={o} value={o}>{o}</option>
+          ))}
+        </select>
       </div>
 
       {/* Etude */}
       <div>
         <label className="block text-xs font-medium text-gray-600 mb-1">Etude</label>
-        <input
-          className="input"
-          placeholder="Etude…"
-          value={filters.etude || ''}
-          onChange={handle('etude')}
-        />
+        <select className="select" value={filters.etude || ''} onChange={handle('etude')}>
+          <option value="">All</option>
+          {(options.etudes || []).map(o => (
+            <option key={o} value={o}>{o}</option>
+          ))}
+        </select>
       </div>
 
       <button

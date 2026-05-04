@@ -74,14 +74,14 @@ export default function PieceDetailPage() {
         &larr; Back to catalog
       </button>
       <div className="card space-y-6">
-        {piece.incipit && (
+        {piece.incipit && piece.permissionStatus !== 'NEED' && (
           <AuthenticatedImage
             src={catalogApi.incipitUrl(piece.incipit)}
             alt="Incipit"
             className="w-full max-h-48 object-contain bg-gray-50 rounded"
           />
         )}
-        {piece.incipitSecundo && (
+        {piece.incipitSecundo && piece.permissionStatus !== 'NEED' && (
           <AuthenticatedImage
             src={catalogApi.incipitUrl(piece.incipitSecundo)}
             alt="Incipit Secondo"

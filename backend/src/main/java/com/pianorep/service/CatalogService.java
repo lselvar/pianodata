@@ -137,6 +137,9 @@ public class CatalogService {
                 .levels(catalogRepository.findDistinctLevels())
                 .levelSecundos(catalogRepository.findDistinctLevelSecundos())
                 .ratings(catalogRepository.findDistinctRatings())
+                .moods(catalogRepository.findDistinctMoods())
+                .types(catalogRepository.findDistinctTypes())
+                .etudes(catalogRepository.findDistinctEtudes())
                 .build();
     }
 
@@ -184,6 +187,25 @@ public class CatalogService {
         Files.write(dest, file.getBytes());
 
         c.setIncipit(code);
+        return CatalogItemDto.from(catalogRepository.save(c));
+    }
+
+    @Transactional
+    public CatalogItemDto saveIncipitSecundoImage(Integer id, MultipartFile file, String imagesBasePath) throws IOException {
+        if (file.isEmpty()) throw new IllegalArgumentException("File is empty");
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.equals("image/png"))
+            throw new IllegalArgumentException("Only PNG images are accepted");
+
+        Catalog c = catalogRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Catalog item not found: " + id));
+
+        String code = "is" + id;
+        Path dest = Paths.get(imagesBasePath, code + ".png");
+        Files.createDirectories(dest.getParent());
+        Files.write(dest, file.getBytes());
+
+        c.setIncipitSecundo(code);
         return CatalogItemDto.from(catalogRepository.save(c));
     }
 
@@ -312,8 +334,11 @@ public class CatalogService {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
                 if (!entry.isDirectory()) {
-                    String name = Paths.get(entry.getName()).getFileName().toString();
-                    if (name.toLowerCase().endsWith(".png")) {
+                    String entryPath = entry.getName();
+                    String name = Paths.get(entryPath).getFileName().toString();
+                    // Skip macOS AppleDouble metadata files (__MACOSX/._*.png)
+                    boolean isMacMetadata = entryPath.contains("__MACOSX") || name.startsWith("._");
+                    if (!isMacMetadata && name.toLowerCase().endsWith(".png")) {
                         try {
                             Files.write(destDir.resolve(name), zis.readAllBytes());
                             stored++;

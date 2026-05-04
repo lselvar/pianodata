@@ -108,6 +108,10 @@ export default function CatalogFormPage() {
         await adminApi.uploadIncipit(savedId, incipitFile)
       }
 
+      if (incipitSecundoFile && savedId) {
+        await adminApi.uploadIncipitSecundo(savedId, incipitSecundoFile)
+      }
+
       navigate('/admin/catalog')
     } catch (err) {
       setError(err.response?.data?.message || 'Save failed. Please try again.')

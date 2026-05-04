@@ -30,11 +30,10 @@ deploy_backend() {
   info "Authenticating Docker with Artifact Registry..."
   gcloud auth configure-docker "$REGION-docker.pkg.dev" --quiet
 
-  info "Building backend Docker image..."
-  docker build -t "$IMAGE:latest" ./backend
+  info "Building backend Docker image (linux/amd64 for Cloud Run)..."
+  docker buildx build --platform linux/amd64 -t "$IMAGE:latest" --push ./backend
 
-  info "Pushing image to Artifact Registry..."
-  docker push "$IMAGE:latest"
+  DB_URL="${SPRING_DATASOURCE_URL:-jdbc:mysql://34.136.163.162:3306/pianorep?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}"
 
   info "Deploying to Cloud Run..."
   BACKEND_URL=$(gcloud run deploy "$BACKEND_SERVICE" \
@@ -46,8 +45,10 @@ deploy_backend() {
     --cpu=1 \
     --min-instances=0 \
     --max-instances=3 \
-    --set-env-vars="INCIPIT_IMAGES_PATH=/app/images,FRONTEND_URL=${FRONTEND_URL:-https://your-project.web.app}" \
+    --set-env-vars="INCIPIT_IMAGES_PATH=/app/images-bucket/incipits,FRONTEND_URL=${FRONTEND_URL:-https://pianorep.web.app},SPRING_DATASOURCE_URL=${DB_URL}" \
     --set-secrets="DB_USERNAME=pianorep-db-username:latest,DB_PASSWORD=pianorep-db-password:latest,JWT_SECRET=pianorep-jwt-secret:latest,GOOGLE_CLIENT_ID=pianorep-google-client-id:latest,STRIPE_SECRET_KEY=pianorep-stripe-secret-key:latest,STRIPE_WEBHOOK_SECRET=pianorep-stripe-webhook-secret:latest,STRIPE_PRICE_ID=pianorep-stripe-price-id:latest" \
+    --add-volume="name=images-vol,type=cloud-storage,bucket=pianorep-pianorep-images" \
+    --add-volume-mount="volume=images-vol,mount-path=/app/images-bucket" \
     --format="value(status.url)" \
     --project="$PROJECT_ID" 2>&1 | grep -oE 'https://[^ ]+' | head -1 || true)
 

@@ -60,6 +60,19 @@ public class AdminCatalogController {
         }
     }
 
+    @PostMapping("/{id}/incipit-secondo")
+    public ResponseEntity<CatalogItemDto> uploadIncipitSecundo(
+            @PathVariable Integer id,
+            @RequestParam("file") MultipartFile file) {
+        try {
+            return ResponseEntity.ok(catalogService.saveIncipitSecundoImage(id, file, imagesBasePath));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     @PostMapping("/bulk/csv")
     public ResponseEntity<BulkUploadResult> bulkUploadCsv(
             @RequestParam("file") MultipartFile file,

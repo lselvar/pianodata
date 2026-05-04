@@ -13,11 +13,19 @@ export const adminApi = {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
   },
+  uploadIncipitSecundo: (id, file) => {
+    const form = new FormData()
+    form.append('file', file)
+    return api.post(`/api/admin/catalog/${id}/incipit-secondo`, form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
   bulkUploadCsv: (file) => {
     const form = new FormData()
     form.append('file', file)
     return api.post('/api/admin/catalog/bulk/csv', form, {
       headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 120000,
     })
   },
   bulkUploadImages: (file) => {
@@ -25,6 +33,7 @@ export const adminApi = {
     form.append('file', file)
     return api.post('/api/admin/catalog/bulk/images', form, {
       headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 120000,
     })
   },
 }
