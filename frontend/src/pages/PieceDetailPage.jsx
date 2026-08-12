@@ -90,7 +90,9 @@ export default function PieceDetailPage() {
         )}
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{piece.title}</h1>
-          {piece.movement && <p className="text-gray-500 mt-0.5">{piece.movement}</p>}
+          {piece.movement != null && String(piece.movement).trim() !== '' && String(piece.movement).trim() !== '0' && (
+            <p className="text-gray-500 mt-0.5">{piece.movement}</p>
+          )}
           <p className="text-piano-600 font-medium mt-1">{piece.composer}</p>
           {piece.originalSource && (
             <p className="text-sm text-gray-500 mt-0.5">arr. {piece.originalSource}</p>

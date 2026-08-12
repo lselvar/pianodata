@@ -13,7 +13,9 @@ export default function PieceCard({ piece }) {
         />
       )}
       <h3 className="font-semibold text-gray-900 text-sm leading-tight">{piece.title}</h3>
-      {piece.movement && <p className="text-xs text-gray-500 mt-0.5">{piece.movement}</p>}
+      {piece.movement != null && String(piece.movement).trim() !== '' && String(piece.movement).trim() !== '0' && (
+        <p className="text-xs text-gray-500 mt-0.5">{piece.movement}</p>
+      )}
       <p className="text-xs text-piano-600 mt-1">{piece.composer}</p>
       {piece.originalSource && (
         <p className="text-xs text-gray-400 mt-0.5">arr. {piece.originalSource}</p>

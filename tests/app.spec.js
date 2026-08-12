@@ -402,6 +402,144 @@ test.describe('Admin — Users', () => {
   })
 })
 
+// ── 4b. Admin — Bulk Resource Link Editing ────────────────────────────────────
+
+test.describe('Admin — Bulk Resource Link Editing', () => {
+  test.beforeEach(async ({ page }) => {
+    await loginAs(page, ADMIN_USER)
+    await mockCatalogAPIs(page)
+    await page.goto('/admin/catalog')
+    await expect(page.locator('tbody tr')).toHaveCount(2)
+  })
+
+  test('checkbox column is visible in the table header and rows', async ({ page }) => {
+    // Header checkbox (select-all)
+    await expect(page.locator('thead input[type="checkbox"]')).toBeVisible()
+    // Each row has a checkbox
+    const rowCheckboxes = page.locator('tbody tr input[type="checkbox"]')
+    await expect(rowCheckboxes).toHaveCount(2)
+  })
+
+  test('bulk action bar is hidden when nothing is selected', async ({ page }) => {
+    await expect(page.getByText(/entries selected/)).not.toBeVisible()
+    await expect(page.getByRole('button', { name: 'Edit Resource Links' })).not.toBeVisible()
+  })
+
+  test('selecting one entry shows the bulk action bar', async ({ page }) => {
+    const firstCheckbox = page.locator('tbody tr').first().locator('input[type="checkbox"]')
+    await firstCheckbox.check()
+
+    await expect(page.getByText('1 entry selected')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Edit Resource Links' })).toBeVisible()
+  })
+
+  test('selecting both entries shows correct count in action bar', async ({ page }) => {
+    const headerCheckbox = page.locator('thead input[type="checkbox"]')
+    await headerCheckbox.check()
+
+    await expect(page.getByText('2 entries selected')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Edit Resource Links' })).toBeVisible()
+  })
+
+  test('Clear link deselects all entries and hides action bar', async ({ page }) => {
+    const headerCheckbox = page.locator('thead input[type="checkbox"]')
+    await headerCheckbox.check()
+    await expect(page.getByText('2 entries selected')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Clear' }).click()
+    await expect(page.getByText(/entries selected/)).not.toBeVisible()
+  })
+
+  test('Edit Resource Links button opens modal with 5 link fields', async ({ page }) => {
+    const headerCheckbox = page.locator('thead input[type="checkbox"]')
+    await headerCheckbox.check()
+    await page.getByRole('button', { name: 'Edit Resource Links' }).click()
+
+    await expect(page.getByRole('heading', { name: 'Edit Resource Links' })).toBeVisible()
+    await expect(page.getByText('Applying to')).toBeVisible()
+    // The modal subtitle shows "2" inside a <span> within the "Applying to" sentence
+    await expect(page.locator('.bg-white .text-gray-700').filter({ hasText: '2' })).toBeVisible()
+
+    // 5 link inputs in the modal
+    const linkInputs = page.locator('[placeholder="https://…"]')
+    await expect(linkInputs).toHaveCount(5)
+
+    // Link fields disabled by default (checkboxes unchecked)
+    const fieldCheckboxes = page.locator('#enable-bookLink1, #enable-bookLink2, #enable-bookLink3, #enable-bookLink4, #enable-bookLink5')
+    for (const cb of await fieldCheckboxes.all()) {
+      await expect(cb).not.toBeChecked()
+    }
+  })
+
+  test('modal Cancel button closes modal without saving', async ({ page }) => {
+    await page.locator('tbody tr').first().locator('input[type="checkbox"]').check()
+    await page.getByRole('button', { name: 'Edit Resource Links' }).click()
+    await expect(page.getByRole('heading', { name: 'Edit Resource Links' })).toBeVisible()
+
+    await page.getByRole('button', { name: 'Cancel' }).click()
+    await expect(page.getByRole('heading', { name: 'Edit Resource Links' })).not.toBeVisible()
+
+    // Selection is preserved after cancel
+    await expect(page.getByText('1 entry selected')).toBeVisible()
+  })
+
+  test('enabling a link field and saving calls adminApi.update for each selected entry', async ({ page }) => {
+    const updateRequests = []
+    await page.route('**/api/admin/catalog/**', route => {
+      if (route.request().method() === 'PUT') {
+        updateRequests.push({ url: route.request().url(), body: route.request().postDataJSON() })
+        route.fulfill({ status: 200, contentType: 'application/json', body: '{}' })
+      } else {
+        route.continue()
+      }
+    })
+
+    // Select both rows via header checkbox
+    await page.locator('thead input[type="checkbox"]').check()
+    await page.getByRole('button', { name: 'Edit Resource Links' }).click()
+
+    // Enable Link 1 and type a URL
+    await page.locator('#enable-bookLink1').check()
+    await page.locator('[placeholder="https://…"]').first().fill('https://example.com/sheet')
+
+    await page.getByRole('button', { name: /Save to 2 entries/ }).click()
+
+    // Should have fired 2 PUT requests (one per selected entry)
+    await expect.poll(() => updateRequests.length, { timeout: 5000 }).toBe(2)
+
+    // Each body should include the updated link
+    for (const req of updateRequests) {
+      expect(req.body.bookLink1).toBe('https://example.com/sheet')
+    }
+
+    // Modal closes and selection clears after save
+    await expect(page.getByRole('heading', { name: 'Edit Resource Links' })).not.toBeVisible()
+    await expect(page.getByText(/entries selected/)).not.toBeVisible()
+  })
+
+  test('trying to save with no fields enabled shows validation error', async ({ page }) => {
+    await page.locator('tbody tr').first().locator('input[type="checkbox"]').check()
+    await page.getByRole('button', { name: 'Edit Resource Links' }).click()
+
+    // Don't enable any field — click Save directly
+    await page.getByRole('button', { name: /Save to/ }).click()
+
+    await expect(page.getByText('Enable at least one link field to update.')).toBeVisible()
+  })
+
+  test('focusing a link input auto-enables its checkbox', async ({ page }) => {
+    await page.locator('tbody tr').first().locator('input[type="checkbox"]').check()
+    await page.getByRole('button', { name: 'Edit Resource Links' }).click()
+
+    const firstLinkInput = page.locator('[placeholder="https://…"]').first()
+    await expect(page.locator('#enable-bookLink1')).not.toBeChecked()
+
+    // Clicking into the input triggers onFocus which auto-enables the checkbox
+    await firstLinkInput.click()
+    await expect(page.locator('#enable-bookLink1')).toBeChecked()
+  })
+})
+
 // ── 5. Pricing ─────────────────────────────────────────────────────────────────
 
 test.describe('Pricing', () => {

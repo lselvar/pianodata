@@ -2,6 +2,31 @@ import { useState } from 'react'
 
 const TEMPO_LABELS = { S: 'Slow', M: 'Medium', F: 'Fast' }
 
+const MOOD_OPTIONS = [
+  'Agitated', 'Anxious', 'Bluesy', 'Bombastic', 'Brilliant', 'Calm', 'Carefree',
+  'Dancing', 'Dramatic', 'Energetic', 'Exuberant', 'Flowing', 'Folksy', 'Frightening',
+  'Gentle', 'Graceful', 'Happy', 'Humorous', 'Jaunty', 'Jazzy', 'Joyful', 'Light',
+  'Majestic', 'Martial', 'Mysterious', 'Passionate', 'Sad', 'Sentimental', 'Serious',
+  'Singing', 'Stately', 'Tragic', 'Vigorous',
+]
+
+const ETUDE_OPTIONS = [
+  '1 octave arpeggios', '2 note slurs', '3 against 4', '3rds', '4ths',
+  '5 finger passagework', '5ths', '6ths', '7th chord arpeggios', '7th chords',
+  'Alberti', 'Alternating hands', 'Arpeggiated chords', 'Arpeggios divided between hands',
+  'Arpeggios with finger crossing', 'Arpeggios with hand crossing', 'Broken chords',
+  'Broken octaves', 'Chord inversions', 'Chromatic scales', 'Circular passagework',
+  'Contraction', 'Contrary Motion', 'Coordination between hands', 'Double notes',
+  'Duple triple', 'Expansion', 'Glissandos', 'Grace notes', 'Hand crossing',
+  'Holding in hand', 'Large chords', 'Leaps', 'Legato against staccato', 'LH melody',
+  'LH only', 'Measured trills', 'Melody divided between hands', 'Octaves',
+  'Off beat accompaniment', 'Ornaments', 'Parallel Motion', 'Passagework',
+  'Repeated chords', 'Repeated notes', 'RH only', 'Rolled chords', 'Rotation',
+  'Scales', 'Short passagework', 'Staccato', 'Stacked hands', 'Stride stationary',
+  'Stride with leaps', 'Stride with octaves', 'Tremolo', 'Triads shifting', 'Trills',
+  'Turns', 'Voicing in hand', 'Waltz stationary', 'Waltz with leaps', 'Waltz with octaves',
+]
+
 const SOLO_DUET_OPTIONS = [
   { value: 'S', label: 'Solo' },
   { value: 'D', label: 'Duet' },
@@ -20,9 +45,12 @@ export default function SearchFilters({ filters, options, onChange }) {
     onChange({ ...filters, [key]: next.length ? next : undefined })
   }
 
+  const normalizeForSearch = (str) =>
+    str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+
   const composerSuggestions = filters.composer
     ? (options.composers || [])
-        .filter(c => c.toLowerCase().includes(filters.composer.toLowerCase()))
+        .filter(c => normalizeForSearch(c).includes(normalizeForSearch(filters.composer)))
         .slice(0, 10)
     : []
 
@@ -84,9 +112,9 @@ export default function SearchFilters({ filters, options, onChange }) {
         </div>
       </div>
 
-      {/* Piece Movement — grouped label with two text inputs */}
+      {/* Piece / Movement — grouped label with two text inputs */}
       <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1.5">Piece Movement</label>
+        <label className="block text-xs font-medium text-gray-600 mb-1.5">Piece</label>
         <div className="space-y-1.5">
           <input
             className="input"
@@ -262,7 +290,7 @@ export default function SearchFilters({ filters, options, onChange }) {
         <label className="block text-xs font-medium text-gray-600 mb-1">Mood</label>
         <select className="select" value={filters.mood || ''} onChange={handle('mood')}>
           <option value="">All</option>
-          {(options.moods || []).map(o => (
+          {MOOD_OPTIONS.map(o => (
             <option key={o} value={o}>{o}</option>
           ))}
         </select>
@@ -284,7 +312,7 @@ export default function SearchFilters({ filters, options, onChange }) {
         <label className="block text-xs font-medium text-gray-600 mb-1">Etude</label>
         <select className="select" value={filters.etude || ''} onChange={handle('etude')}>
           <option value="">All</option>
-          {(options.etudes || []).map(o => (
+          {ETUDE_OPTIONS.map(o => (
             <option key={o} value={o}>{o}</option>
           ))}
         </select>

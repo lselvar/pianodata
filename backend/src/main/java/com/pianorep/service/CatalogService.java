@@ -19,6 +19,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.text.Normalizer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -81,15 +82,24 @@ public class CatalogService {
             List<Predicate> predicates = new ArrayList<>();
 
             if (StringUtils.hasText(q)) {
-                String like = "%" + q.toLowerCase() + "%";
-                predicates.add(cb.or(
-                    cb.like(cb.lower(root.get("title")), like),
-                    cb.like(cb.lower(root.get("composer")), like),
-                    cb.like(cb.lower(root.get("catalogName")), like)
-                ));
+                // Split into tokens so multi-field queries like "Beethoven Bagatelle" work:
+                // each token must match at least one of title / composer / catalogName (AND across tokens)
+                String[] tokens = q.trim().split("\\s+");
+                for (String token : tokens) {
+                    String like = "%" + token.toLowerCase() + "%";
+                    predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("title")), like),
+                        cb.like(cb.lower(root.get("composer")), like),
+                        cb.like(cb.lower(root.get("catalogName")), like)
+                    ));
+                }
             }
-            if (StringUtils.hasText(composer))
-                predicates.add(cb.equal(root.get("composer"), composer));
+            if (StringUtils.hasText(composer)) {
+                jakarta.persistence.criteria.Expression<String> unaccentedCol =
+                        cb.function("unaccent", String.class, cb.lower(root.get("composer")));
+                predicates.add(cb.like(unaccentedCol,
+                        "%" + stripAccents(composer.toLowerCase()) + "%"));
+            }
             if (StringUtils.hasText(catalogName))
                 predicates.add(cb.like(cb.lower(root.get("catalogName")), "%" + catalogName.toLowerCase() + "%"));
             if (StringUtils.hasText(era))
@@ -353,6 +363,11 @@ public class CatalogService {
 
         return BulkUploadResult.builder()
                 .imagesStored(stored).created(0).skipped(0).errors(errors).build();
+    }
+
+    private static String stripAccents(String s) {
+        return Normalizer.normalize(s, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "");
     }
 
     private String csvGet(CSVRecord rec, String header) {
