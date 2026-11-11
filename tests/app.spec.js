@@ -185,7 +185,7 @@ test.describe('Catalog', () => {
     await page.goto('/catalog')
 
     await expect(page.getByRole('heading', { name: 'Filters' })).toBeVisible()
-    await expect(page.getByPlaceholder('Title, composer...')).toBeVisible()
+    await expect(page.getByPlaceholder('Title…')).toBeVisible()
     await expect(page.getByText('2 pieces found')).toBeVisible()
   })
 
@@ -219,7 +219,7 @@ test.describe('Catalog', () => {
         body: JSON.stringify({ ...CATALOG_PAGE, content: [CATALOG_PAGE.content[0]], totalElements: 1 }),
       })
     )
-    await page.getByPlaceholder('Title, composer...').fill('Bach')
+    await page.getByPlaceholder('Title…').fill('Bach')
     await expect(page.getByText('1 pieces found')).toBeVisible()
   })
 
@@ -230,6 +230,31 @@ test.describe('Catalog', () => {
     await expect(page).toHaveURL(/\/catalog\/\d+/)
     await expect(page.getByRole('heading', { name: 'Variations on a Theme' })).toBeVisible()
     await expect(page.getByText('← Back to catalog')).toBeVisible()
+  })
+
+  test('Back from a piece restores the previous filters and results', async ({ page }) => {
+    await page.goto('/catalog')
+    await expect(page.getByText('2 pieces found')).toBeVisible()
+
+    // Narrow the search to a single result
+    await page.route('**/api/catalog/search**', route =>
+      route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({ ...CATALOG_PAGE, content: [CATALOG_PAGE.content[0]], totalElements: 1 }),
+      })
+    )
+    const searchBox = page.getByPlaceholder('Title…')
+    await searchBox.fill('Adam')
+    await expect(page.getByText('1 pieces found')).toBeVisible()
+
+    // Open the piece, then go back
+    await page.locator('a[href^="/catalog/"]').first().click()
+    await expect(page).toHaveURL(/\/catalog\/\d+/)
+    await page.getByText('← Back to catalog').click()
+
+    await expect(page).toHaveURL(/\/catalog$/)
+    await expect(searchBox).toHaveValue('Adam')
+    await expect(page.getByText('1 pieces found')).toBeVisible()
   })
 
   test('piece detail shows composer and arranged-from separately', async ({ page }) => {

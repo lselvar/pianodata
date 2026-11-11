@@ -6,9 +6,23 @@ import PieceCard from '../components/catalog/PieceCard'
 import Pagination from '../components/common/Pagination'
 import LoadingSpinner from '../components/common/LoadingSpinner'
 
+const STATE_KEY = 'pianorep.catalog.searchState'
+
+// Restore the last search (filters + page) so Back from a piece returns to the same results.
+function loadSavedState() {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(STATE_KEY) || 'null')
+    if (saved && typeof saved.filters === 'object' && saved.filters !== null) {
+      return { filters: saved.filters, page: Number.isInteger(saved.page) ? saved.page : 0 }
+    }
+  } catch { /* ignore corrupt or unavailable storage */ }
+  return { filters: {}, page: 0 }
+}
+
 export default function CatalogPage() {
-  const [filters, setFilters] = useState({})
-  const [page, setPage] = useState(0)
+  const [initial] = useState(loadSavedState)
+  const [filters, setFilters] = useState(initial.filters)
+  const [page, setPage] = useState(initial.page)
   const [results, setResults] = useState(null)
   const [filterOptions, setFilterOptions] = useState({})
   const [loading, setLoading] = useState(true)
@@ -19,6 +33,10 @@ export default function CatalogPage() {
       .then(res => setFilterOptions(res.data))
       .catch(() => {})
   }, [])
+
+  useEffect(() => {
+    try { sessionStorage.setItem(STATE_KEY, JSON.stringify({ filters, page })) } catch { /* ignore */ }
+  }, [filters, page])
 
   const search = useCallback(() => {
     setLoading(true)
