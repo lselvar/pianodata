@@ -5,6 +5,19 @@ import { adminApi } from '../../api/adminApi'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import Pagination from '../../components/common/Pagination'
 
+const STATE_KEY = 'pianorep.admin.catalog.searchState'
+
+// Restore the last admin search (query + page) so Back from an edit returns to the same results.
+function loadSavedState() {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(STATE_KEY) || 'null')
+    if (saved && typeof saved.q === 'string') {
+      return { q: saved.q, page: Number.isInteger(saved.page) && saved.page >= 0 ? saved.page : 0 }
+    }
+  } catch { /* ignore corrupt or unavailable storage */ }
+  return { q: '', page: 0 }
+}
+
 const LINK_KEYS = ['bookLink1', 'bookLink2', 'bookLink3', 'bookLink4', 'bookLink5']
 
 function BulkLinksModal({ selectedIds, selectedPieces, onClose, onSaved }) {
@@ -100,8 +113,9 @@ function BulkLinksModal({ selectedIds, selectedPieces, onClose, onSaved }) {
 export default function AdminCatalogPage() {
   const navigate = useNavigate()
   const [results, setResults] = useState({ content: [], totalPages: 0, totalElements: 0 })
-  const [page, setPage] = useState(0)
-  const [q, setQ] = useState('')
+  const [initial] = useState(loadSavedState)
+  const [page, setPage] = useState(initial.page)
+  const [q, setQ] = useState(initial.q)
   const [loading, setLoading] = useState(true)
   const [deletingId, setDeletingId] = useState(null)
   const [selectedIds, setSelectedIds] = useState(new Set())
@@ -116,6 +130,10 @@ export default function AdminCatalogPage() {
   }, [q, page])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => {
+    try { sessionStorage.setItem(STATE_KEY, JSON.stringify({ q, page })) } catch { /* ignore */ }
+  }, [q, page])
 
   // Clear selection when page/query changes
   useEffect(() => { setSelectedIds(new Set()) }, [q, page])
