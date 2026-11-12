@@ -311,13 +311,41 @@ test.describe('Admin — Catalog', () => {
     await page.goto('/admin/catalog')
 
     // Adam piece in row — arranger shown under composer
-    const composerCell = page.locator('tbody tr').nth(0).locator('td').nth(1)
+    const composerCell = page.locator('tbody tr').nth(0).locator('td').nth(2)
     await expect(composerCell.getByText('Adam, Louis')).toBeVisible()
     await expect(composerCell.getByText('arr. Haydn, Josef')).toBeVisible()
 
     // Bach piece row has no arranged-from
-    const bachCell = page.locator('tbody tr').nth(1).locator('td').nth(1)
+    const bachCell = page.locator('tbody tr').nth(1).locator('td').nth(2)
     await expect(bachCell.locator('text=/^arr\\. /')).toHaveCount(0)
+  })
+
+  test('Back from editing an entry restores the admin search and results', async ({ page }) => {
+    await page.route(/\/api\/admin\/catalog\/\d+$/, route =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(PIECE_DETAIL) })
+    )
+    await page.goto('/admin/catalog')
+    await expect(page.locator('tbody tr')).toHaveCount(2)
+
+    // Narrow the search to a single result
+    await page.route('**/api/catalog/search**', route =>
+      route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({ ...CATALOG_PAGE, content: [CATALOG_PAGE.content[0]], totalElements: 1 }),
+      })
+    )
+    const searchBox = page.getByPlaceholder('Search by Composer, Catalog, Title')
+    await searchBox.fill('Adam sonata')
+    await expect(page.locator('tbody tr')).toHaveCount(1)
+
+    // Open the editor, then go back
+    await page.getByRole('button', { name: 'Edit' }).first().click()
+    await expect(page).toHaveURL(/\/admin\/catalog\/\d+\/edit/)
+    await page.goBack()
+
+    await expect(page).toHaveURL(/\/admin\/catalog$/)
+    await expect(searchBox).toHaveValue('Adam sonata')
+    await expect(page.locator('tbody tr')).toHaveCount(1)
   })
 
   test('opens the new entry form with all required fields', async ({ page }) => {
